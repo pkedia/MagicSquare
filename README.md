@@ -1,0 +1,2 @@
+# MagicSquare
+My python work
