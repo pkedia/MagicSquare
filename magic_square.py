@@ -1,105 +1,112 @@
-size = 0
-panelsize=700
-success = 0
-indexError = -1
-positionError =-2
-maxValue = 25
-size = 0
-panelsize=700
-success = 0
-indexError = -1
-positionError =-2
+MAX_VALUE = 25
 #self.mySquare = []
-true = 1
-false = 0
-unknown = 0
 odd = 1
 even = 2
 even4 = 3
 
 
 class Matrix:
+  size = 0
+  """Data Structure that stores the values in magic square"""
   def __init__(self, size):
-    i = 0
+    """Initializes the Matrix to all zeroes"""
     self.size = size
     self.table = [0]
-    for i in range(1,size*size): #initialize the matrix elements to zero
+    for i in range(1, size*size): # initialize the matrix elements to zero
       self.table.append(0)
-    #print('created a matrix of size {0:2d}'.format(size))
     
   def RawPrint(self):
+    """Dump the Matrix for debugging purposes"""
     print(self.table)
     
-  def update(self,n,i,j):     #update matrix[i,j] = n
+  def update(self,n,i,j):
+    """updates the cell i,j with the value n, does not check if cell is already filled"""
     #print('Update-updating {0:4d} {1:4d} with value {2:4d}'.format(i,j,n))
-   #if (i > size  or j > size): return indexError
+    if i > self.size or j > self.size: raise IndexError
     index = i*self.size + j
     #print('update-size,i,j,index is {0:2d} {1:2d} {2:2d} {3:2d}'.format(self.size,i,j,index))
     self.table[index] = n
-    #self.RawPrint()
-    return success
+
     
-  def access(self,i,j):         #accessing value at i,j
-    if (i > self.size  or j > self.size): raise IndexError
-    index = (i)*self.size + j
-    #print('accessing {0:3d}{1:3d} with index {2:3d}'.format(i,j,index))
+  def access(self,i,j):
+    """Retrieves the value in cell i,j"""
+    if i > self.size or j > self.size: raise IndexError
+    index = i*self.size + j
     return self.table[index]
     
   def printmatrix(self,size):
+    """ prints out the matrix formatted"""
     s = size
     print('Magic Square of size ','{0:4d}'.format(s))
-    #print(self.table)
+    # figure out how much padding to add based on # of digits in largest number
     digits = len(str(size*size))
     digit_fmt = "%" + str(digits) + "d"
     if (s > 0):
-      for i in range(0,s*s, s):
+      for i in range(0, s*s, s):
          print([(digit_fmt % i) for i in self.table[i:i+s]])
 
 class MagicSquare:
+  """Base class that Magic Squares inherit from"""
   def __init__(self, size):
-    #rint('we are in init of MagicSquare')
     self.size = size
-    self.currow = -1
-    self.curcol = -1
 
-    oddSquare = "MagicSquare of odd size i.e. %3d X %3d";
-    evenSquare = "MagicSquare of even size i.e. %3d X %3d";
-    even4Square = "MagicSquare of even (multiple of 4) size i.e. %3d X %3d";
     self.mySquare = Matrix(size)
     
-  def CreateWebPageOutput(self):
+  def CreateWebPageOutput(self,size):
+    """Generates HTML Output for displaying teh Magic Square in a browser"""
     #print the magic square
-    s = self.size
+    s = size
     w = s*6
     sum = (s*s)*(s*s+1)/2/s
     #self.mySquare.printmatrix(self.size)
-    outstr = '<!DOCTYPE html>\n<html>\n<head>\n<style>\ntr {\n    text-align: Center;\n    padding:10px;\n}'
-    outstr += 'table tr:nth-child(even) {\nbackground-color: #f00;\ncolor:white;}\ntable tr:nth-child(odd) {\nbackground-color:#fff;\n}\n'
-    outstr += '\n</style\n</head>'
-    outstr += '<p>Magic Square of size '+str(s)+'</p>'
-    outstr += '<p>Sum of each Row, Each Column and each main Diagonal is '+str(sum)+'</p>'
-    outstr += '<body>\n<table border="1" '
-    for i in range (self.size):
+    outstr = """
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <style type="text/css">\n
+            tr {
+              text-align: Center;
+              padding:10px;
+            }
+            table tr:nth-child(even) {
+              background-color: #f00;
+              color:white;
+            }
+            table tr:nth-child(odd) {
+              background-color:#fff;
+            }
+          </style>
+        </head>
+        <body>
+          <p>Magic Square of size %d</p>
+          <p>
+            Sum of each Row, Each Column and each main Diagonal is %d
+          </p>
+        <table border="1">
+    """ % (size, sum)
+    for i in range (size):
       outstr += '<tr>'
-      for j in range (self.size):
-        outstr += '<td>' + str(self.mySquare.access(i,j)) + '</td>'
+      for j in range (size):
+        outstr += '<td>%d</td>' % self.mySquare.access(i,j)
       outstr += '</tr>'
-    outstr += '</table>\n</body>\n</html>'
+    outstr += """
+        </table>
+      </body>
+    </html>
+    """
     #print(outstr)
     return outstr
 
 class OddMagicSquare(MagicSquare):
-  def __init__(self,size):
-    MagicSquare.__init__(self,size)
-    #print('We are in Init of odd')
+  """Generates the magic square of odd size"""
+  def __init__(self, size):
+    MagicSquare.__init__(self, size)
     self.size = size
-    type = odd
-    iconize = panelsize/self.size
-    #print('initing an odd magicsquare of size {0:2d}'.format(self.size))
+
     
   def MoveNext(self):
-    newrow = -1
-    newcol = -1
+    newrow = (self.currow - 1) % self.size
+    newcol = (self.curcol + 1) % self.size
     newrow = self.currow - 1
     newcol = self.curcol + 1
     #print('MoveNext-Before::newrow {0:2d} newcol {1:2d}'.format(newrow,newcol))
@@ -109,22 +116,20 @@ class OddMagicSquare(MagicSquare):
     if newcol >= self.size:
       newcol = 0
       
-    #print('Movenext-After ::newrow {0:2d} newcol {1:2d}'.format(newrow,newcol))
-    if self.mySquare.access(newrow, newcol) == 0:
-      #print('cell {0:3d}{1:3d} is empty'.format(newrow,newcol))
-      self.currow = newrow
-      self.curcol = newcol
-    else:
-      self.currow = self.currow + 1
-      if self.currow >= self.size: 
-        self.currow == 0
+    # if the square we're trying to move to is already occupied, use the square directly
+    # below the current one
+    if self.mySquare.access(newrow, newcol) != 0:
+        newrow = (self.currow + 1) % self.size
+        newcol = self.curcol
+
+    self.currow = newrow
+    self.curcol = newcol
     self.curnum += 1  
     #print('movenext:{0:3d} {1:3d} {2:3d}'.format(self.curnum, self.currow, self.curcol))
     self.mySquare.update(self.curnum, self.currow, self.curcol)
     
   def Build(self):
-    #print('We are in Build of Odd')
-    #print('{0:2d}'.format(self.size))
+    # place the first number, then keep calling moveNext()
     self.curnum = 1
     self.currow = 0
     self.curcol = (self.size-1)/2
@@ -133,12 +138,18 @@ class OddMagicSquare(MagicSquare):
        self.MoveNext()
     
 class Even4MagicSquare(MagicSquare):
+  """Generates Magic Square of doubly even size, i.e. n is a multiple of 4"""
   
   def __init__(self,size):
     MagicSquare.__init__(self,size)
     self.size = size
     
   def SeedTheSquare(self):
+    # fill the square sequentially going right to left and top to bottom, i.e. 3rd cell on 2nd row in a square of size 8 will be 11
+    for i in range(self.size):
+      for j in range(self.size):
+        self.mySquare.update(i*self.size+j+1,i,j)
+    # zero out corner cells and the center block of 4 cells in each sub matrix of size 4X4
     for i in range(0, self.size, 4):
       for j in range(0, self.size, 4):
         self.mySquare.update(0,i,j)
@@ -151,6 +162,7 @@ class Even4MagicSquare(MagicSquare):
         self.mySquare.update(0,i+3,j+3)
     
   def FillTheRest(self):
+    # fill the zeroed out cells with numbers sequentially working backwards from last cell to first right to left and bottom to top
     for i in range(0,self.size):
       for j in range(0,self.size):
         if (self.mySquare.access(i,j) == 0):
@@ -158,22 +170,11 @@ class Even4MagicSquare(MagicSquare):
       
     
   def Build(self):
-    #check the size validity must be multiple of 4
-    if (self.size % 4 == 0 ):
-      print("size ok")
-    else:
-      print("size is not multiple of 4")
-      return
-    #print('building MagicSquare of size {0:3d}'.format(self.size))
-    for i in range(self.size):
-      for j in range(self.size):
-        self.mySquare.update(i*self.size+j+1,i,j)
     self.SeedTheSquare()
     self.FillTheRest()
 
 class EvenMagicSquare(MagicSquare):
-  currow = 0
-  curcol = 0
+  """Generates a Magic Square of even size"""
   
   def __init__(self,size):
     MagicSquare.__init__(self,size)
@@ -191,25 +192,20 @@ class EvenMagicSquare(MagicSquare):
     self.mySquare.update(1,self.currow,self.curcol)
     
     for num in range(2,subsize*subsize+1):
-      if(self.OneUpOneRight(subsize,num) == false):
+      if(self.OneUpOneRight(subsize,num) == False):
         self.GoDownOne(subsize,num)
        
   def OneUpOneRight(self,size,nextnum):
     #print('OneUpOneRight: size = {0:2d},nextnum = {1:2d}'.format(size,nextnum))
-    i = self.currow
-    j = self.curcol
-    i -= 1
-    j += 1
-    j %= size
-    i %= size
-    #if (i < 0): i += size
+    i = (self.currow - 1) % size
+    j = (self.curcol + 1) % size
     if (self.mySquare.access(i,j) ==0):
       self.mySquare.update(nextnum,i,j)
       self.currow = i
       self.curcol = j
-      return true
+      return True
     else:
-      return false
+      return False
      
   def FillTheRest(self):
     halfsize = self.size/2
@@ -230,7 +226,7 @@ class EvenMagicSquare(MagicSquare):
       temp = self.mySquare.access(i,j)
       self.mySquare.update(self.mySquare.access(i+subsize,j),i,j)
       self.mySquare.update(temp,i+subsize,j)
-    if (domidel == true):
+    if (domidel == True):
       temp = self.mySquare.access((subsize-1)/2,j)
       self.mySquare.update(self.mySquare.access(subsize+(subsize -1)/2,j),(subsize-1)/2,j)
       self.mySquare.update(temp,(subsize+(subsize -1)/2),j)
@@ -242,34 +238,24 @@ class EvenMagicSquare(MagicSquare):
     self.mySquare.update(temp,subsize+(subsize-1)/2,j)
     
   def Build(self):
-    #Make sure the size is even and not multiple of 4
-    if ((self.size-2)%4 == 0):
-      print('size is even and not multiple of 4')
-    else:
-      print('Not a valid size for even size square')
-      return
     self.SeedTheSquare()
-    #self.mySquare.RawPrint()
     self.FillTheRest()
-    #print('after FillTheRest')
-    #self.mySquare.RawPrint()
     #compute the number of cols to swap
     nswapcols = (self.size - 2)/4
     #swap top half with bottom half in cols 1..nswapcols and size-nswapcols + 1 .. size
     for j in range(nswapcols - 1):
-      self.SwapColHalves(j, false)
-      self.SwapColHalves(size - 1-j, false)
+      self.SwapColHalves(j, False)
+      self.SwapColHalves(size - 1-j, False)
     #now swap nswapcols and swap back middle element
-    self.SwapColHalves(nswapcols - 1, true)
+    self.SwapColHalves(nswapcols - 1, True)
     self.DoMidElements(nswapcols)
     
 def main(size = None):
-  typeOfMS = [ 'unknown', 'odd', 'even', 'even4']
 
   if size == None:
     size = int(input("what size Magic Square would you like: "))
 
-  if (size > maxValue):
+  if (size > MAX_VALUE):
     return
   elif (size % 4) == 0:     #Even4MagicSquare
     magicSquare = Even4MagicSquare(size)
@@ -277,9 +263,8 @@ def main(size = None):
     magicSquare = EvenMagicSquare(size)
   else:  
     magicSquare = OddMagicSquare(size) 
-  #even4Square = "MagicSquare of even (multiple of 4) size i.e. %3d X %3d";
   magicSquare.Build()
-  return magicSquare.CreateWebPageOutput()
+  return magicSquare.CreateWebPageOutput(size)
 
 
 if __name__ == "__main__":
